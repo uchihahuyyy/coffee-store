@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> - Chi tiết</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Coffee Store</h1>
+        <nav>
+            <a href="/">Trang chủ</a>
+            <a href="/cart">Giỏ hàng</a>
+            <a href="/auth/profile">Hồ sơ</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="product-detail-wrapper">
+            <div class="product-detail-image">
+                <img src="<%= product.image %>" alt="<%= product.name %>">
+            </div>
+
+            <div class="product-detail-info">
+                <nav class="breadcrumb">Sản phẩm / <%= product.category %></nav>
+                <h2 class="detail-name"><%= product.name %></h2>
+                
+                <div class="detail-price-box">
+                    <% if (product.discount > 0) { %>
+                        <span class="old-price"><%= product.price.toLocaleString() %>đ</span>
+                        <span class="current-price"><%= (product.price * (1 - product.discount / 100)).toLocaleString() %>đ</span>
+                        <span class="discount-tag">-<%= product.discount %>%</span>
+                    <% } else { %>
+                        <span class="current-price"><%= product.price.toLocaleString() %> VND</span>
+                    <% } %>
+                </div>
+
+                <p class="detail-description"><%= product.description || "Một sự kết hợp hoàn hảo giữa hương vị truyền thống và phong cách hiện đại. Sản phẩm được pha chế từ những hạt cà phê thượng hạng nhất." %></p>
+
+                <div class="purchase-section">
+                    <div class="quantity-control">
+                        <button id="btn-minus">-</button>
+                        <input type="number" id="buy-quantity" value="1" min="1">
+                        <button id="btn-plus">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" id="add-to-cart-main" data-id="<%= product._id %>">
+                        <i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="/details.js"></script>
+</body>
+</html>

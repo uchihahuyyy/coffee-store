@@ -1,5 +1,4 @@
 // app.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -13,10 +12,6 @@ dotenv.config();
 
 const app = express();
 
-// Thêm 2 dòng này để kiểm tra
-console.log(">>> Kiểm tra biến MONGO_URI:", process.env.MONGO_URI);
-console.log(">>> Thư mục hiện tại:", __dirname);
-
 // -------------------- KẾT NỐI CSDL --------------------
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -26,38 +21,30 @@ mongoose
   .then(() => console.log("✅ MongoDB đã kết nối"))
   .catch((err) => console.error("❌ Lỗi kết nối MongoDB:", err));
 
-// -------------------- MIDDLEWARE CƠ BẢN --------------------
+// -------------------- MIDDLEWARE --------------------
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware ghi log (nếu cần)
 const loggingMiddleware = require("./middleware/logginMiddleware");
 app.use(loggingMiddleware);
 
-// -------------------- CẤU HÌNH SESSION --------------------
-// Sử dụng secret từ biến môi trường cho bảo mật phiên
 app.use(
   session({
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET || "huy_secret",
     resave: false,
     saveUninitialized: true,
-    // Nếu cần cấu hình thêm cookie (ví dụ: thời gian tồn tại, secure)
-    // cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
   })
 );
 
-// -------------------- PASSPORT & ATTACH USER --------------------
 const passport = require("./config/passport");
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Middleware attachUser: tự động gán thông tin người dùng (nếu có) vào res.locals
 const attachUser = require("./middleware/attachUser");
 app.use(attachUser);
 
-// -------------------- CẤU HÌNH VIEW ENGINE & STATIC FILES --------------------
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -65,15 +52,30 @@ app.use(express.static(path.join(__dirname, "public")));
 // -------------------- MOUNT ROUTERS --------------------
 app.use("/auth", require("./routes/auth"));
 app.use("/api/products", require("./routes/product"));
-app.use("/cart", require("./routes/cart"));       // Định nghĩa API giỏ hàng ở file: routes/cart.js
+app.use("/cart", require("./routes/cart"));
 app.use("/checkout", require("./routes/checkout"));
 app.use("/review", require("./routes/review"));
 app.use("/payment", require("./routes/payment"));
 app.use("/order", require("./routes/order"));
 app.use("/status", require("./routes/status"));
 
-// Nếu có backend admin được cấu hình trong public, mount các route backend đó
 require("./public/backend")(app);
+
+// -------------------- ROUTE CHI TIẾT SẢN PHẨM --------------------
+app.get("/product/:id", async (req, res) => {
+  try {
+    const Product = require("./models/Product");
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).send("Sản phẩm không tồn tại");
+    
+    res.render("detail", { 
+      product, 
+      user: res.locals.user 
+    });
+  } catch (error) {
+    res.status(500).send("Lỗi lấy chi tiết sản phẩm: " + error.message);
+  }
+});
 
 // -------------------- ROUTE TRANG CHỦ --------------------
 app.get("/", async (req, res) => {
@@ -81,7 +83,6 @@ app.get("/", async (req, res) => {
   const { search, category, minPrice, maxPrice } = req.query;
   let query = {};
 
-  // Tạo điều kiện tìm kiếm sản phẩm dựa vào query params
   if (search) query.name = { $regex: search, $options: "i" };
   if (category) query.category = category;
   if (minPrice || maxPrice) {
@@ -92,7 +93,6 @@ app.get("/", async (req, res) => {
 
   try {
     const products = await Product.find(query);
-    // Sử dụng res.locals.user được gán bởi middleware attachUser
     res.render("home", {
       products,
       search,
@@ -102,16 +102,12 @@ app.get("/", async (req, res) => {
       user: res.locals.user,
     });
   } catch (error) {
-    console.error("Lỗi lấy danh sách sản phẩm:", error.message);
     res.status(500).send("Lỗi lấy danh sách sản phẩm: " + error.message);
   }
 });
 
-// -------------------- ERROR HANDLING MIDDLEWARE --------------------
-const errorHandler = require("./middleware/errorHandler");
-app.use(errorHandler);
+app.use(require("./middleware/errorHandler"));
 
-// -------------------- KHỞI CHẠY SERVER --------------------
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy trên cổng ${PORT}`);
