@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán thành công - Coffee Store</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Coffee Store</h1>
+    <nav>
+      <a href="/">Trang chủ</a>
+      <a href="/cart">Giỏ hàng</a>
+      <a href="/checkout">Thanh toán</a>
+      <a href="/auth/profile">Hồ sơ</a>
+  
+      <% if (user) { %>
+        <span>👋 Xin chào, <%= user.username %>!</span>
+        <a href="/auth/logout">Đăng xuất</a>
+      <% } else { %>
+        <a href="/auth/login">Đăng nhập</a>
+        <a href="/auth/register">Đăng ký</a>
+      <% } %>
+    </nav>
+  </header>
+  
+  <main>
+    <h2><%= message %></h2>
+    <a href="/" style="display: inline-block; margin-top: 20px; color: blue; text-decoration: none;">← Quay về trang chủ</a>
+  </main>
+</body>
+</html>

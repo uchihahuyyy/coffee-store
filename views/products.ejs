@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.name %> - Coffee Store</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Coffee Store</h1>
+    <nav>
+      <a href="/">Trang chủ</a>
+      <a href="/cart">Giỏ hàng</a>
+      <a href="/checkout">Thanh toán</a>
+      <a href="/auth/profile">Hồ sơ</a>
+  
+      <% if (user) { %>
+        <span>👋 Xin chào, <%= user.username %>!</span>
+        <a href="/auth/logout">Đăng xuất</a>
+      <% } else { %>
+        <a href="/auth/login">Đăng nhập</a>
+        <a href="/auth/register">Đăng ký</a>
+      <% } %>
+    </nav>
+  </header>
+  
+  <main>
+    <div class="product-detail">
+      <img src="<%= product.image %>" alt="<%= product.name %>" style="max-width: 300px; border-radius: 8px;">
+      <h2><%= product.name %></h2>
+      <% if (product.discount > 0) { %>
+        <p>Giá gốc: <del><%= product.price %> VND</del></p>
+        <p>Giá giảm: <%= (product.price * (1 - product.discount / 100)).toFixed(0) %> VND</p>
+      <% } else { %>
+        <p>Giá: <%= product.price %> VND</p>
+      <% } %>
+      <p>Danh mục: <%= product.category %></p>
+      <button class="product-button add-to-cart" data-id="<%= product._id %>">Thêm vào giỏ hàng</button>
+      <a href="/" style="display: inline-block; margin-top: 20px; color: blue; text-decoration: none;">← Quay về trang chủ</a>
+    </div>
+    <h3>Đánh giá sản phẩm</h3>
+    <div class="reviews">
+      <% if (reviews.length > 0) { %>
+        <% reviews.forEach(review => { %>
+          <div class="review">
+            <p><strong><%= review.userId.username %></strong> (Đánh giá: <%= review.rating %>/5)</p>
+            <p><%= review.comment %></p>
+            <p><small>Ngày: <%= review.createdAt.toLocaleDateString('vi-VN') %></small></p>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>Chưa có đánh giá nào.</p>
+      <% } %>
+    </div>
+  </main>
+  <script src="/scripts.js"></script>
+</body>
+</html>
