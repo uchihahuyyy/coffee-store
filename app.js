@@ -13,6 +13,10 @@ dotenv.config();
 
 const app = express();
 
+// Thêm 2 dòng này để kiểm tra
+console.log(">>> Kiểm tra biến MONGO_URI:", process.env.MONGO_URI);
+console.log(">>> Thư mục hiện tại:", __dirname);
+
 // -------------------- KẾT NỐI CSDL --------------------
 mongoose
   .connect(process.env.MONGO_URI, {
